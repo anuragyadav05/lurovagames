@@ -48,7 +48,7 @@ for (let i = 1; i <= 385; i++) {
   });
 }
 
-// Discount Calculation Helper
+// Discount Helper
 function calculateGamePrice(originalPrice, category) {
   let discountPercentage = 40; // Flat 40% Off
   if (category === "Sci-Fi") {
@@ -59,33 +59,7 @@ function calculateGamePrice(originalPrice, category) {
 }
 
 // =========================================================================
-// 2. WORKING DIRECT YOUTUBE VIDEOS (REPLACED LIVE STREAMS & PLAYLISTS)
-// =========================================================================
-const directVideoIDs = [
-  { creator: "Techno Gamerz", title: "GTA 5 Mission Highlights", id: "jNQXAC9IVRw" },
-  { creator: "CarryIsLive", title: "Horror Game Night Special", id: "fJ9rUzIMcZQ" },
-  { creator: "BeastBoyShub", title: "Elden Ring Boss Defeated", id: "dQw4w9WgXcQ" },
-  { creator: "Mythpat", title: "Minecraft Funniest Mods", id: "L_LUpnjgPso" },
-  { creator: "Total Gaming", title: "Free Fire Clutch Squad Wipe", id: "kJQP7kiw5Fk" },
-  { creator: "Mortal", title: "BGMI Pro Player Tips", id: "3JZ_D3ELwOQ" },
-  { creator: "Scout", title: "Valorant Radiant Rank Gameplay", id: "2Vv-BfVoq4g" },
-  { creator: "Jonathan Gaming", title: "GodL Jonathan 20 Kills Rampage", id: "CevxZvSJLk8" },
-  { creator: "GamerFleet", title: "Minecraft Survival Hardcore Day 100", id: "7wtfhZwyrCA" },
-  { creator: "Lokesh Gamer", title: "Diamond Crate Unboxing Rampage", id: "YQHsXMglC9A" }
-];
-
-const indianCreatorVideos = [];
-for (let i = 1; i <= 150; i++) {
-  const baseVid = directVideoIDs[i % directVideoIDs.length];
-  indianCreatorVideos.push({
-    creator: baseVid.creator,
-    title: `${baseVid.title} #${i}`,
-    url: `https://www.youtube.com/embed/${baseVid.id}`
-  });
-}
-
-// =========================================================================
-// 3. GAMING NEWS DATASET (150+ EXPANDABLE ARTICLES)
+// 2. GAMING NEWS DATASET (150+ EXPANDABLE ARTICLES)
 // =========================================================================
 const gamingNews = [];
 const tags = ["UNREAL ENGINE", "STEAM SALE", "HARDWARE", "ESPORTS", "PLAYSTATION", "GTA 6", "CYBERPUNK", "VALORANT", "XBOX", "NVIDIA"];
@@ -102,9 +76,10 @@ for (let i = 1; i <= 150; i++) {
 }
 
 let currentCategoryFilter = 'ALL';
+let pendingCheckoutGame = null;
 
 // =========================================================================
-// 4. NAVIGATION & MOBILE DRAWER LOGIC
+// 3. NAVIGATION & MOBILE DRAWER LOGIC
 // =========================================================================
 function switchTab(tabId, event) {
   document.querySelectorAll('.section-container').forEach(sec => sec.classList.remove('active-section'));
@@ -119,6 +94,10 @@ function switchTab(tabId, event) {
 
   const nav = document.getElementById('mainNav');
   if (nav) nav.classList.remove('mobile-active');
+
+  if (tabId === 'my-games') {
+    renderMyGames();
+  }
 }
 
 function toggleMobileNav() {
@@ -127,7 +106,7 @@ function toggleMobileNav() {
 }
 
 // =========================================================================
-// 5. LIVE GAME SEARCH & CATEGORY FILTERING
+// 4. LIVE GAME SEARCH & CATEGORY FILTERING
 // =========================================================================
 function filterCategory(catName, btnElement) {
   currentCategoryFilter = catName;
@@ -148,9 +127,6 @@ function filterGames() {
   renderSteamStore(filtered);
 }
 
-// =========================================================================
-// 6. DEDICATED NEWS SEARCH FILTERING
-// =========================================================================
 function filterNews() {
   const query = document.getElementById('newsSearchInput').value.toLowerCase();
   const filteredNews = gamingNews.filter(item => 
@@ -162,7 +138,7 @@ function filterNews() {
 }
 
 // =========================================================================
-// 7. RENDER COMPONENT FUNCTIONS
+// 5. RENDER STORE & MY GAMES VAULT
 // =========================================================================
 function renderSteamStore(gamesToRender = paidSteamGames) {
   const grid = document.getElementById('steam-games-grid');
@@ -189,7 +165,7 @@ function renderSteamStore(gamesToRender = paidSteamGames) {
             onerror="handleImageError(this)"
             style="width:100%; height:100%; object-fit:cover; transition: opacity 0.4s ease;"
           >
-          <span class="discount-badge" style="position: absolute; top: 8px; right: 8px; background: var(--accent-pink); color: #fff; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-family: 'Orbitron'; shadow: 0 0 10px rgba(255,0,127,0.5);">${priceInfo.discountPercentage}% OFF</span>
+          <span class="discount-badge" style="position: absolute; top: 8px; right: 8px; background: var(--accent-pink); color: #fff; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-family: 'Orbitron';">${priceInfo.discountPercentage}% OFF</span>
         </div>
         <div class="card-body">
           <h3 class="card-title">${game.title}</h3>
@@ -204,7 +180,7 @@ function renderSteamStore(gamesToRender = paidSteamGames) {
           </div>
           <div class="btn-group">
             <button class="btn btn-details" onclick="openModalById(${game.id})">Details</button>
-            <button class="btn btn-buy" onclick="triggerRazorpay(${priceInfo.discountedPrice}, '${escapeQuotes(game.title)}')">Buy</button>
+            <button class="btn btn-buy" onclick="openBillingModal(${game.id})">Buy</button>
           </div>
         </div>
       </div>
@@ -212,6 +188,46 @@ function renderSteamStore(gamesToRender = paidSteamGames) {
   }).join('');
 
   setTimeout(loadRealImages, 50);
+}
+
+function renderMyGames() {
+  const grid = document.getElementById('my-games-grid');
+  const badge = document.getElementById('myGamesCountBadge');
+  if (!grid) return;
+
+  const purchasedGames = JSON.parse(localStorage.getItem('lurova_purchased_games') || '[]');
+  if (badge) badge.innerText = `${purchasedGames.length} Owned`;
+
+  if (purchasedGames.length === 0) {
+    grid.innerHTML = `
+      <div class="my-games-empty" style="grid-column: 1/-1;">
+        <i class="fa-solid fa-box-open"></i>
+        <h2 style="font-family: 'Orbitron'; margin-bottom: 8px;">NO PURCHASED GAMES YET</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Browse our 400+ Steam Store catalog and purchase games to activate them in your library.</p>
+        <button class="btn btn-buy" style="max-width: 220px; margin: 0 auto;" onclick="switchTab('store', event)">Browse Games Store</button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = purchasedGames.map(game => `
+    <div class="game-card" style="border-color: var(--accent-green);">
+      <div class="img-wrapper" style="position: relative; height: 165px; overflow: hidden; background: #000;">
+        <img src="${game.img}" alt="${game.title}" onerror="this.src='${FALLBACK_COVER_IMG}'" style="width:100%; height:100%; object-fit:cover;">
+        <span style="position: absolute; top: 8px; right: 8px; background: var(--accent-green); color: #000; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-family: 'Orbitron';">OWNED</span>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">${game.title}</h3>
+        <div class="meta-pills">
+          <span class="meta-pill cat-pill">${game.category}</span>
+          <span class="meta-pill"><i class="fa-solid fa-key"></i> ${game.key || 'STEAM-KEY-REGISTERED'}</span>
+        </div>
+        <div style="margin-top: auto; display: flex; gap: 8px;">
+          <button class="btn btn-buy" style="background: linear-gradient(45deg, #00ff88, #00f0ff); color: #000;" onclick="alert('Activation Key: ' + '${game.key}')">View Activation Key</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
 function loadRealImages() {
@@ -239,26 +255,6 @@ function handleImageLoad(img) {
 function handleImageError(img) {
   img.src = FALLBACK_COVER_IMG;
   img.onerror = null;
-}
-
-function renderVideos() {
-  const grid = document.getElementById('youtube-videos-grid');
-  const badge = document.getElementById('videoCountBadge');
-  if (!grid) return;
-
-  if (badge) badge.innerText = `${indianCreatorVideos.length} Videos`;
-
-  grid.innerHTML = indianCreatorVideos.map(vid => `
-    <div class="video-card">
-      <div class="video-wrapper">
-        <iframe src="${vid.url}" allowfullscreen title="${vid.title}" loading="lazy"></iframe>
-      </div>
-      <div class="video-info">
-        <i class="fa-brands fa-youtube" style="color: #ff0000; font-size: 1.2rem;"></i>
-        <span>${vid.title}</span>
-      </div>
-    </div>
-  `).join('');
 }
 
 function renderNews(newsToRender = gamingNews) {
@@ -295,7 +291,135 @@ function toggleNewsExpand(cardElement) {
 }
 
 // =========================================================================
-// 8. NATIVE PLAYABLE WEB ARCADE ENGINE
+// 6. DEDICATED BILLING PAGE & RAZORPAY PAYMENT GATEWAY INTEGRATION
+// =========================================================================
+function openModalById(gameId) {
+  const game = paidSteamGames.find(g => g.id === gameId);
+  if (!game) return;
+
+  const priceInfo = calculateGamePrice(game.price, game.category);
+
+  document.getElementById('modalTitle').innerText = game.title;
+  
+  const modalImg = document.getElementById('modalImg');
+  modalImg.src = FALLBACK_COVER_IMG;
+  const tempImg = new Image();
+  tempImg.src = game.img;
+  tempImg.onload = () => { modalImg.src = game.img; };
+  tempImg.onerror = () => { modalImg.src = FALLBACK_COVER_IMG; };
+
+  document.getElementById('modalLaunchDate').innerText = game.launch;
+  document.getElementById('modalSize').innerText = game.size;
+  document.getElementById('modalVersion').innerText = game.version;
+  document.getElementById('modalCategory').innerText = game.category;
+  document.getElementById('modalDesc').innerText = game.desc;
+  
+  document.getElementById('modalPrice').innerHTML = `
+    <span style="text-decoration: line-through; color: var(--text-muted); font-size: 1.1rem; margin-right: 10px;">₹${priceInfo.originalPrice.toLocaleString('en-IN')}</span>
+    <span>₹${priceInfo.discountedPrice.toLocaleString('en-IN')}</span>
+    <span style="font-size: 0.85rem; background: var(--accent-pink); color: #fff; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">${priceInfo.discountPercentage}% OFF</span>
+  `;
+  
+  const buyBtn = document.getElementById('modalBuyBtn');
+  buyBtn.onclick = () => {
+    closeModal('gameModal');
+    openBillingModal(game.id);
+  };
+  
+  document.getElementById('gameModal').style.display = 'flex';
+}
+
+function openBillingModal(gameId) {
+  const game = paidSteamGames.find(g => g.id === gameId);
+  if (!game) return;
+
+  pendingCheckoutGame = game;
+  const priceInfo = calculateGamePrice(game.price, game.category);
+
+  document.getElementById('summaryGameTitle').innerText = game.title;
+  document.getElementById('summaryBasePrice').innerText = `₹${priceInfo.originalPrice.toLocaleString('en-IN')}`;
+  document.getElementById('summaryDiscount').innerText = `-₹${(priceInfo.originalPrice - priceInfo.discountedPrice).toLocaleString('en-IN')} (${priceInfo.discountPercentage}% OFF)`;
+  document.getElementById('summaryTotal').innerText = `₹${priceInfo.discountedPrice.toLocaleString('en-IN')}`;
+
+  document.getElementById('billingModal').style.display = 'flex';
+}
+
+function handleBillingSubmit(event) {
+  event.preventDefault();
+
+  if (!pendingCheckoutGame) return;
+
+  const billName = document.getElementById('billName').value;
+  const billEmail = document.getElementById('billEmail').value;
+  const billPhone = document.getElementById('billPhone').value;
+
+  const priceInfo = calculateGamePrice(pendingCheckoutGame.price, pendingCheckoutGame.category);
+
+  // Trigger Razorpay with user's live API Key ID
+  const options = {
+    "key": "rzp_live_S4aoxO09BneiJ3",
+    "amount": priceInfo.discountedPrice * 100,
+    "currency": "INR",
+    "name": "LUROVA Games",
+    "description": "Purchase Key: " + pendingCheckoutGame.title,
+    "image": "https://account.lurova.life/favicon.ico",
+    "handler": function (response) {
+      alert("Payment Successful!\nPayment ID: " + response.razorpay_payment_id + "\nGame added to 'My Games' Vault.");
+      
+      // Save game to user's purchased vault in localStorage
+      savePurchasedGame(pendingCheckoutGame, response.razorpay_payment_id);
+      
+      closeModal('billingModal');
+      switchTab('my-games');
+    },
+    "prefill": {
+      "name": billName,
+      "email": billEmail,
+      "contact": billPhone
+    },
+    "theme": {
+      "color": "#00f0ff"
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+}
+
+function savePurchasedGame(game, paymentId) {
+  const existing = JSON.parse(localStorage.getItem('lurova_purchased_games') || '[]');
+  const key = `STEAM-${Math.random().toString(36).substring(2, 7).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+  
+  if (!existing.some(g => g.id === game.id)) {
+    existing.push({
+      id: game.id,
+      title: game.title,
+      img: game.img,
+      category: game.category,
+      key: key,
+      paymentId: paymentId
+    });
+    localStorage.setItem('lurova_purchased_games', JSON.stringify(existing));
+  }
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.style.display = 'none';
+}
+
+window.onclick = function(event) {
+  if (event.target.classList.contains('modal')) {
+    event.target.style.display = 'none';
+  }
+};
+
+function escapeQuotes(str) {
+  return str.replace(/'/g, "\\'");
+}
+
+// =========================================================================
+// 7. NATIVE PLAYABLE WEB ARCADE ENGINE
 // =========================================================================
 let currentArcadeGame = 'spaceShooter';
 let arcadeInterval = null;
@@ -335,7 +459,6 @@ function startCurrentArcadeGame() {
   }
 }
 
-// Built-in Game 1: Space Shooter
 function runSpaceShooter(canvas, ctx) {
   let player = { x: canvas.width / 2 - 20, y: canvas.height - 40, w: 40, h: 20, speed: 6 };
   let bullets = [];
@@ -363,16 +486,13 @@ function runSpaceShooter(canvas, ctx) {
       }
     }
 
-    // Draw Player
     ctx.fillStyle = '#00f0ff';
     ctx.fillRect(player.x, player.y, player.w, player.h);
 
-    // Enemies spawn
     if (Math.random() < 0.03) {
       enemies.push({ x: Math.random() * (canvas.width - 30), y: -20, w: 30, h: 20, speed: 2 });
     }
 
-    // Bullets logic
     ctx.fillStyle = '#ff007f';
     bullets.forEach((b, bi) => {
       b.y -= 8;
@@ -380,7 +500,6 @@ function runSpaceShooter(canvas, ctx) {
       if (b.y < 0) bullets.splice(bi, 1);
     });
 
-    // Enemies logic
     ctx.fillStyle = '#ffd700';
     enemies.forEach((en, ei) => {
       en.y += en.speed;
@@ -395,14 +514,12 @@ function runSpaceShooter(canvas, ctx) {
       });
     });
 
-    // Score
     ctx.fillStyle = '#00f0ff';
     ctx.font = '20px Orbitron';
     ctx.fillText(`SCORE: ${score}`, 20, 35);
   }, 1000 / 60);
 }
 
-// Built-in Game 2: Cyber Snake
 function runCyberSnake(canvas, ctx) {
   let grid = 20;
   let snake = [{ x: 160, y: 160 }, { x: 140, y: 160 }];
@@ -442,11 +559,9 @@ function runCyberSnake(canvas, ctx) {
       snake.pop();
     }
 
-    // Draw Food
     ctx.fillStyle = '#ff007f';
     ctx.fillRect(food.x, food.y, grid - 2, grid - 2);
 
-    // Draw Snake
     ctx.fillStyle = '#00f0ff';
     snake.forEach(part => ctx.fillRect(part.x, part.y, grid - 2, grid - 2));
 
@@ -456,7 +571,6 @@ function runCyberSnake(canvas, ctx) {
   }, 100);
 }
 
-// Built-in Game 3: Neon Breaker
 function runBrickBreaker(canvas, ctx) {
   let paddle = { x: canvas.width / 2 - 50, y: canvas.height - 30, w: 100, h: 15 };
   let ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 4, dy: -4, r: 8 };
@@ -522,88 +636,12 @@ function runBrickBreaker(canvas, ctx) {
 }
 
 // =========================================================================
-// 9. MODAL & RAZORPAY CONTROLLER
-// =========================================================================
-function openModalById(gameId) {
-  const game = paidSteamGames.find(g => g.id === gameId);
-  if (!game) return;
-
-  const priceInfo = calculateGamePrice(game.price, game.category);
-
-  document.getElementById('modalTitle').innerText = game.title;
-  
-  const modalImg = document.getElementById('modalImg');
-  modalImg.src = FALLBACK_COVER_IMG;
-  const tempImg = new Image();
-  tempImg.src = game.img;
-  tempImg.onload = () => { modalImg.src = game.img; };
-  tempImg.onerror = () => { modalImg.src = FALLBACK_COVER_IMG; };
-
-  document.getElementById('modalLaunchDate').innerText = game.launch;
-  document.getElementById('modalSize').innerText = game.size;
-  document.getElementById('modalVersion').innerText = game.version;
-  document.getElementById('modalCategory').innerText = game.category;
-  document.getElementById('modalDesc').innerText = game.desc;
-  
-  document.getElementById('modalPrice').innerHTML = `
-    <span style="text-decoration: line-through; color: var(--text-muted); font-size: 1.1rem; margin-right: 10px;">₹${priceInfo.originalPrice.toLocaleString('en-IN')}</span>
-    <span>₹${priceInfo.discountedPrice.toLocaleString('en-IN')}</span>
-    <span style="font-size: 0.85rem; background: var(--accent-pink); color: #fff; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">${priceInfo.discountPercentage}% OFF</span>
-  `;
-  
-  const buyBtn = document.getElementById('modalBuyBtn');
-  buyBtn.onclick = () => triggerRazorpay(priceInfo.discountedPrice, game.title);
-  
-  document.getElementById('gameModal').style.display = 'flex';
-}
-
-function closeModal() {
-  document.getElementById('gameModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-  const modal = document.getElementById('gameModal');
-  if (event.target === modal) {
-    closeModal();
-  }
-};
-
-function escapeQuotes(str) {
-  return str.replace(/'/g, "\\'");
-}
-
-function triggerRazorpay(amountINR, itemTitle) {
-  const options = {
-    "key": "YOUR_RAZORPAY_KEY_ID",
-    "amount": amountINR * 100,
-    "currency": "INR",
-    "name": "LUROVA Games",
-    "description": "Purchase: " + itemTitle,
-    "image": "https://account.lurova.life/favicon.ico",
-    "handler": function (response) {
-      alert("Payment Successful!\nPayment ID: " + response.razorpay_payment_id);
-      closeModal();
-    },
-    "prefill": {
-      "name": "Gamer",
-      "email": "user@lurova.life"
-    },
-    "theme": {
-      "color": "#00f0ff"
-    }
-  };
-  
-  const rzp = new Razorpay(options);
-  rzp.open();
-}
-
-// =========================================================================
-// 10. INITIALIZATION
+// 8. INITIALIZATION
 // =========================================================================
 function initLUROVA() {
   renderSteamStore();
-  renderVideos();
   renderNews();
+  renderMyGames();
 }
 
 if (document.readyState === 'loading') {
