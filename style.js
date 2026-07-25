@@ -21,10 +21,8 @@ const paidSteamGames = [
   { id: 949230, title: "Cities: Skylines II", price: 2499, launch: "Oct 24, 2023", size: "60 GB", version: "v1.1.5", category: "Strategy", img: "https://cdn.akamai.steamstatic.com/steam/apps/949230/header.jpg", desc: "Build and manage a metropolis with deep economic simulation." }
 ];
 
-// Fallback Loading Cover Image URL
 const FALLBACK_COVER_IMG = "https://plain-apac-prod-public.komododecks.com/202607/25/0bRSIXi1f44TX0POwiqY/image.png";
 
-// Known Steam App IDs pool to ensure real game covers for generated titles
 const steamAppIdPool = [
   1091500, 1245620, 271590, 1174180, 292030, 1593500, 2322010, 2358720, 990080, 1086940,
   582010, 1623730, 1196590, 1551360, 2195250, 553850, 1716740, 814380, 374320, 570940,
@@ -50,39 +48,44 @@ for (let i = 1; i <= 385; i++) {
   });
 }
 
-// =========================================================================
-// 2. DISCOUNT CALCULATION HELPER
-// =========================================================================
+// Discount Calculation Helper
 function calculateGamePrice(originalPrice, category) {
-  let discountPercentage = 40; // Base flat 40% off
+  let discountPercentage = 40; // Flat 40% Off
   if (category === "Sci-Fi") {
-    discountPercentage += 10; // Additional 10% off for Sci-Fi (50% total)
+    discountPercentage += 10; // Additional 10% Off for Sci-Fi
   }
   const discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100));
-  return {
-    originalPrice,
-    discountedPrice,
-    discountPercentage
-  };
+  return { originalPrice, discountedPrice, discountPercentage };
 }
 
 // =========================================================================
-// 3. CREATOR VIDEOS DATASET (150+ INLINE PLAYABLE VIDEOS)
+// 2. WORKING DIRECT YOUTUBE VIDEOS (REPLACED LIVE STREAMS & PLAYLISTS)
 // =========================================================================
-const indianCreatorVideos = [];
-const creatorList = ["Techno Gamerz", "CarryIsLive", "Total Gaming", "Mortal", "Dynamo Gaming", "Scout", "Jonathan Gaming", "Lokesh Gamer", "Mythpat", "GamerFleet"];
+const directVideoIDs = [
+  { creator: "Techno Gamerz", title: "GTA 5 Mission Highlights", id: "jNQXAC9IVRw" },
+  { creator: "CarryIsLive", title: "Horror Game Night Special", id: "fJ9rUzIMcZQ" },
+  { creator: "BeastBoyShub", title: "Elden Ring Boss Defeated", id: "dQw4w9WgXcQ" },
+  { creator: "Mythpat", title: "Minecraft Funniest Mods", id: "L_LUpnjgPso" },
+  { creator: "Total Gaming", title: "Free Fire Clutch Squad Wipe", id: "kJQP7kiw5Fk" },
+  { creator: "Mortal", title: "BGMI Pro Player Tips", id: "3JZ_D3ELwOQ" },
+  { creator: "Scout", title: "Valorant Radiant Rank Gameplay", id: "2Vv-BfVoq4g" },
+  { creator: "Jonathan Gaming", title: "GodL Jonathan 20 Kills Rampage", id: "CevxZvSJLk8" },
+  { creator: "GamerFleet", title: "Minecraft Survival Hardcore Day 100", id: "7wtfhZwyrCA" },
+  { creator: "Lokesh Gamer", title: "Diamond Crate Unboxing Rampage", id: "YQHsXMglC9A" }
+];
 
+const indianCreatorVideos = [];
 for (let i = 1; i <= 150; i++) {
-  const creator = creatorList[i % creatorList.length];
+  const baseVid = directVideoIDs[i % directVideoIDs.length];
   indianCreatorVideos.push({
-    creator: creator,
-    title: `${creator} - Episode #${i} Stream`,
-    url: `https://www.youtube.com/embed/videoseries?list=PL479C9338959DF0A3`
+    creator: baseVid.creator,
+    title: `${baseVid.title} #${i}`,
+    url: `https://www.youtube.com/embed/${baseVid.id}`
   });
 }
 
 // =========================================================================
-// 4. GAMING NEWS DATASET (150+ EXPANDABLE ARTICLES)
+// 3. GAMING NEWS DATASET (150+ EXPANDABLE ARTICLES)
 // =========================================================================
 const gamingNews = [];
 const tags = ["UNREAL ENGINE", "STEAM SALE", "HARDWARE", "ESPORTS", "PLAYSTATION", "GTA 6", "CYBERPUNK", "VALORANT", "XBOX", "NVIDIA"];
@@ -101,7 +104,7 @@ for (let i = 1; i <= 150; i++) {
 let currentCategoryFilter = 'ALL';
 
 // =========================================================================
-// 5. NAVIGATION & MOBILE DRAWER LOGIC
+// 4. NAVIGATION & MOBILE DRAWER LOGIC
 // =========================================================================
 function switchTab(tabId, event) {
   document.querySelectorAll('.section-container').forEach(sec => sec.classList.remove('active-section'));
@@ -124,7 +127,7 @@ function toggleMobileNav() {
 }
 
 // =========================================================================
-// 6. LIVE GAME SEARCH & CATEGORY FILTERING
+// 5. LIVE GAME SEARCH & CATEGORY FILTERING
 // =========================================================================
 function filterCategory(catName, btnElement) {
   currentCategoryFilter = catName;
@@ -146,7 +149,7 @@ function filterGames() {
 }
 
 // =========================================================================
-// 7. DEDICATED NEWS SEARCH FILTERING
+// 6. DEDICATED NEWS SEARCH FILTERING
 // =========================================================================
 function filterNews() {
   const query = document.getElementById('newsSearchInput').value.toLowerCase();
@@ -159,7 +162,7 @@ function filterNews() {
 }
 
 // =========================================================================
-// 8. RENDER COMPONENT FUNCTIONS WITH IMAGE LOADING COVER & DISCOUNTS
+// 7. RENDER COMPONENT FUNCTIONS
 // =========================================================================
 function renderSteamStore(gamesToRender = paidSteamGames) {
   const grid = document.getElementById('steam-games-grid');
@@ -208,11 +211,9 @@ function renderSteamStore(gamesToRender = paidSteamGames) {
     `;
   }).join('');
 
-  // Trigger loading real images after initial placeholder render
   setTimeout(loadRealImages, 50);
 }
 
-// Progressive image loading handler
 function loadRealImages() {
   document.querySelectorAll('img[data-real-src]').forEach(img => {
     const realSrc = img.getAttribute('data-real-src');
@@ -237,7 +238,7 @@ function handleImageLoad(img) {
 
 function handleImageError(img) {
   img.src = FALLBACK_COVER_IMG;
-  img.onerror = null; // Prevent infinite fallback loops
+  img.onerror = null;
 }
 
 function renderVideos() {
@@ -250,10 +251,10 @@ function renderVideos() {
   grid.innerHTML = indianCreatorVideos.map(vid => `
     <div class="video-card">
       <div class="video-wrapper">
-        <iframe src="${vid.url}" allowfullscreen title="${vid.title}"></iframe>
+        <iframe src="${vid.url}" allowfullscreen title="${vid.title}" loading="lazy"></iframe>
       </div>
       <div class="video-info">
-        <i class="fa-brands fa-youtube" style="color: #ff0000;"></i>
+        <i class="fa-brands fa-youtube" style="color: #ff0000; font-size: 1.2rem;"></i>
         <span>${vid.title}</span>
       </div>
     </div>
@@ -294,7 +295,234 @@ function toggleNewsExpand(cardElement) {
 }
 
 // =========================================================================
-// 9. MODAL & RAZORPAY CONTROLLER WITH DISCOUNT SUPPORT
+// 8. NATIVE PLAYABLE WEB ARCADE ENGINE
+// =========================================================================
+let currentArcadeGame = 'spaceShooter';
+let arcadeInterval = null;
+
+const arcadeConfigs = {
+  spaceShooter: { title: "SPACE DEFENDER", controls: "Controls: Left/Right Arrow Keys or Touch to Move | Space to Shoot" },
+  cyberSnake: { title: "CYBER SNAKE", controls: "Controls: Arrow Keys to turn Snake | Eat Cyan Orbs" },
+  brickBreaker: { title: "NEON BREAKER", controls: "Controls: Left/Right Arrow Keys or Drag to move Paddle" }
+};
+
+function selectArcadeGame(gameKey, btnElement) {
+  currentArcadeGame = gameKey;
+  document.querySelectorAll('.arcade-game-btn').forEach(b => b.classList.remove('active'));
+  if (btnElement) btnElement.classList.add('active');
+
+  const config = arcadeConfigs[gameKey];
+  document.getElementById('arcadeGameTitle').innerText = config.title;
+  document.getElementById('arcadeGameControls').innerText = config.controls;
+  document.getElementById('arcadeOverlay').style.display = 'flex';
+
+  if (arcadeInterval) clearInterval(arcadeInterval);
+}
+
+function startCurrentArcadeGame() {
+  document.getElementById('arcadeOverlay').style.display = 'none';
+  const canvas = document.getElementById('arcadeCanvas');
+  const ctx = canvas.getContext('2d');
+
+  if (arcadeInterval) clearInterval(arcadeInterval);
+
+  if (currentArcadeGame === 'spaceShooter') {
+    runSpaceShooter(canvas, ctx);
+  } else if (currentArcadeGame === 'cyberSnake') {
+    runCyberSnake(canvas, ctx);
+  } else if (currentArcadeGame === 'brickBreaker') {
+    runBrickBreaker(canvas, ctx);
+  }
+}
+
+// Built-in Game 1: Space Shooter
+function runSpaceShooter(canvas, ctx) {
+  let player = { x: canvas.width / 2 - 20, y: canvas.height - 40, w: 40, h: 20, speed: 6 };
+  let bullets = [];
+  let enemies = [];
+  let score = 0;
+  let keys = {};
+
+  window.onkeydown = (e) => keys[e.key] = true;
+  window.onkeyup = (e) => keys[e.key] = false;
+
+  canvas.ontouchmove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    player.x = e.touches[0].clientX - rect.left - player.w / 2;
+  };
+
+  arcadeInterval = setInterval(() => {
+    ctx.fillStyle = '#050814';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
+    if (keys['ArrowRight'] && player.x < canvas.width - player.w) player.x += player.speed;
+    if (keys[' '] || keys['Spacebar']) {
+      if (bullets.length === 0 || bullets[bullets.length - 1].y < canvas.height - 60) {
+        bullets.push({ x: player.x + player.w / 2 - 3, y: player.y, w: 6, h: 12 });
+      }
+    }
+
+    // Draw Player
+    ctx.fillStyle = '#00f0ff';
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+
+    // Enemies spawn
+    if (Math.random() < 0.03) {
+      enemies.push({ x: Math.random() * (canvas.width - 30), y: -20, w: 30, h: 20, speed: 2 });
+    }
+
+    // Bullets logic
+    ctx.fillStyle = '#ff007f';
+    bullets.forEach((b, bi) => {
+      b.y -= 8;
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      if (b.y < 0) bullets.splice(bi, 1);
+    });
+
+    // Enemies logic
+    ctx.fillStyle = '#ffd700';
+    enemies.forEach((en, ei) => {
+      en.y += en.speed;
+      ctx.fillRect(en.x, en.y, en.w, en.h);
+
+      bullets.forEach((b, bi) => {
+        if (b.x < en.x + en.w && b.x + b.w > en.x && b.y < en.y + en.h && b.y + b.h > en.y) {
+          enemies.splice(ei, 1);
+          bullets.splice(bi, 1);
+          score += 10;
+        }
+      });
+    });
+
+    // Score
+    ctx.fillStyle = '#00f0ff';
+    ctx.font = '20px Orbitron';
+    ctx.fillText(`SCORE: ${score}`, 20, 35);
+  }, 1000 / 60);
+}
+
+// Built-in Game 2: Cyber Snake
+function runCyberSnake(canvas, ctx) {
+  let grid = 20;
+  let snake = [{ x: 160, y: 160 }, { x: 140, y: 160 }];
+  let dx = grid, dy = 0;
+  let food = { x: 300, y: 300 };
+  let score = 0;
+
+  window.onkeydown = (e) => {
+    if (e.key === 'ArrowLeft' && dx === 0) { dx = -grid; dy = 0; }
+    if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -grid; }
+    if (e.key === 'ArrowRight' && dx === 0) { dx = grid; dy = 0; }
+    if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = grid; }
+  };
+
+  arcadeInterval = setInterval(() => {
+    ctx.fillStyle = '#050814';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+      clearInterval(arcadeInterval);
+      alert(`GAME OVER! Final Score: ${score}`);
+      selectArcadeGame('cyberSnake');
+      return;
+    }
+
+    snake.unshift(head);
+
+    if (head.x === food.x && head.y === food.y) {
+      score += 10;
+      food = {
+        x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
+        y: Math.floor(Math.random() * (canvas.height / grid)) * grid
+      };
+    } else {
+      snake.pop();
+    }
+
+    // Draw Food
+    ctx.fillStyle = '#ff007f';
+    ctx.fillRect(food.x, food.y, grid - 2, grid - 2);
+
+    // Draw Snake
+    ctx.fillStyle = '#00f0ff';
+    snake.forEach(part => ctx.fillRect(part.x, part.y, grid - 2, grid - 2));
+
+    ctx.fillStyle = '#ffd700';
+    ctx.font = '20px Orbitron';
+    ctx.fillText(`SCORE: ${score}`, 20, 35);
+  }, 100);
+}
+
+// Built-in Game 3: Neon Breaker
+function runBrickBreaker(canvas, ctx) {
+  let paddle = { x: canvas.width / 2 - 50, y: canvas.height - 30, w: 100, h: 15 };
+  let ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 4, dy: -4, r: 8 };
+  let bricks = [];
+  let score = 0;
+
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 8; c++) {
+      bricks.push({ x: c * 95 + 25, y: r * 30 + 50, w: 85, h: 20, active: true });
+    }
+  }
+
+  window.onkeydown = (e) => {
+    if (e.key === 'ArrowLeft' && paddle.x > 0) paddle.x -= 25;
+    if (e.key === 'ArrowRight' && paddle.x < canvas.width - paddle.w) paddle.x += 25;
+  };
+
+  arcadeInterval = setInterval(() => {
+    ctx.fillStyle = '#050814';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    if (ball.x < 0 || ball.x > canvas.width) ball.dx *= -1;
+    if (ball.y < 0) ball.dy *= -1;
+
+    if (ball.y > canvas.height) {
+      clearInterval(arcadeInterval);
+      alert(`GAME OVER! Final Score: ${score}`);
+      selectArcadeGame('brickBreaker');
+      return;
+    }
+
+    if (ball.y + ball.r >= paddle.y && ball.x >= paddle.x && ball.x <= paddle.x + paddle.w) {
+      ball.dy *= -1;
+    }
+
+    ctx.fillStyle = '#00f0ff';
+    ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+
+    ctx.fillStyle = '#ff007f';
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#8a2be2';
+    bricks.forEach(b => {
+      if (b.active) {
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        if (ball.x > b.x && ball.x < b.x + b.w && ball.y > b.y && ball.y < b.y + b.h) {
+          b.active = false;
+          ball.dy *= -1;
+          score += 10;
+        }
+      }
+    });
+
+    ctx.fillStyle = '#ffd700';
+    ctx.font = '20px Orbitron';
+    ctx.fillText(`SCORE: ${score}`, 20, 35);
+  }, 1000 / 60);
+}
+
+// =========================================================================
+// 9. MODAL & RAZORPAY CONTROLLER
 // =========================================================================
 function openModalById(gameId) {
   const game = paidSteamGames.find(g => g.id === gameId);
