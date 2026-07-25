@@ -48,11 +48,10 @@ for (let i = 1; i <= 385; i++) {
   });
 }
 
-// Discount Helper
 function calculateGamePrice(originalPrice, category) {
-  let discountPercentage = 40; // Flat 40% Off
+  let discountPercentage = 40;
   if (category === "Sci-Fi") {
-    discountPercentage += 10; // Additional 10% Off for Sci-Fi
+    discountPercentage += 10;
   }
   const discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100));
   return { originalPrice, discountedPrice, discountPercentage };
@@ -79,7 +78,104 @@ let currentCategoryFilter = 'ALL';
 let pendingCheckoutGame = null;
 
 // =========================================================================
-// 3. NAVIGATION & MOBILE DRAWER LOGIC
+// 3. SSO LOGIN & USER AUTHENTICATION CONTROLLER (account.lurova.life)
+// =========================================================================
+const SSO_LOGIN_URL = "https://account.lurova.life/login?redirect_uri=https://games.lurova.life";
+
+function checkSSOAuthentication() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token') || urlParams.get('sso_token');
+  const email = urlParams.get('email');
+  const name = urlParams.get('name') || urlParams.get('username');
+
+  // Case 1: Returning from account.lurova.life with URL params
+  if (token || email) {
+    const userSession = {
+      isLoggedIn: true,
+      token: token || 'sso_active_session_' + Date.now(),
+      email: email || 'user@lurova.life',
+      name: name || email ? email.split('@')[0] : 'Gamer'
+    };
+    localStorage.setItem('lurova_sso_user', JSON.stringify(userSession));
+    
+    // Clean URL query string
+    window.history.replaceState({}, document.title, window.location.pathname);
+    renderAuthUI(userSession);
+    return;
+  }
+
+  // Case 2: Check existing active session in localStorage
+  const savedUser = JSON.parse(localStorage.getItem('lurova_sso_user') || 'null');
+  if (savedUser && savedUser.isLoggedIn) {
+    renderAuthUI(savedUser);
+  } else {
+    renderAuthUI({ isLoggedIn: false });
+  }
+}
+
+function redirectToSSOLogin() {
+  window.location.href = SSO_LOGIN_URL;
+}
+
+function renderAuthUI(user) {
+  const container = document.getElementById('authContainer');
+  if (!container) return;
+
+  if (user && user.isLoggedIn) {
+    const initials = user.name ? user.name.substring(0, 2).toUpperCase() : 'LU';
+    container.innerHTML = `
+      <div class="user-profile-badge" onclick="toggleProfileDropdown()">
+        <div class="avatar-icon">${initials}</div>
+        <span style="font-weight: 700; font-family: 'Orbitron'; font-size: 0.9rem;">${user.name}</span>
+        <i class="fa-solid fa-chevron-down" style="font-size: 0.8rem; color: var(--accent-cyan);"></i>
+      </div>
+      
+      <div id="profileDropdown" class="profile-dropdown">
+        <div class="profile-dropdown-header">
+          <div style="font-weight: bold; font-size: 0.95rem;">${user.name}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${user.email}</div>
+        </div>
+        <div class="dropdown-item" onclick="switchTab('my-games')">
+          <i class="fa-solid fa-gamepad" style="color: var(--accent-cyan);"></i> My Games Vault
+        </div>
+        <div class="dropdown-item" onclick="window.open('https://account.lurova.life', '_blank')">
+          <i class="fa-solid fa-user-gear" style="color: var(--accent-purple);"></i> Account Settings
+        </div>
+        <div class="dropdown-item logout" onclick="logoutSSO()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <button class="auth-btn" onclick="redirectToSSOLogin()">
+        <i class="fa-solid fa-user-astronaut"></i> SSO Login
+      </button>
+    `;
+  }
+}
+
+function toggleProfileDropdown() {
+  const dropdown = document.getElementById('profileDropdown');
+  if (dropdown) dropdown.classList.toggle('show');
+}
+
+function logoutSSO() {
+  localStorage.removeItem('lurova_sso_user');
+  alert("Logged out successfully from LUROVA Games.");
+  window.location.reload();
+}
+
+// Close profile dropdown when clicking outside
+window.addEventListener('click', (e) => {
+  if (!e.target.closest('.auth-container')) {
+    const dropdown = document.getElementById('profileDropdown');
+    if (dropdown) dropdown.classList.remove('show');
+  }
+});
+
+// =========================================================================
+// 4. NAVIGATION & MOBILE DRAWER LOGIC
 // =========================================================================
 function switchTab(tabId, event) {
   document.querySelectorAll('.section-container').forEach(sec => sec.classList.remove('active-section'));
@@ -106,7 +202,7 @@ function toggleMobileNav() {
 }
 
 // =========================================================================
-// 4. LIVE GAME SEARCH & CATEGORY FILTERING
+// 5. LIVE GAME SEARCH & CATEGORY FILTERING
 // =========================================================================
 function filterCategory(catName, btnElement) {
   currentCategoryFilter = catName;
@@ -138,7 +234,7 @@ function filterNews() {
 }
 
 // =========================================================================
-// 5. RENDER STORE & MY GAMES VAULT
+// 6. RENDER STORE & MY GAMES VAULT
 // =========================================================================
 function renderSteamStore(gamesToRender = paidSteamGames) {
   const grid = document.getElementById('steam-games-grid');
@@ -291,7 +387,7 @@ function toggleNewsExpand(cardElement) {
 }
 
 // =========================================================================
-// 6. DEDICATED BILLING PAGE & RAZORPAY PAYMENT GATEWAY INTEGRATION
+// 7. DEDICATED BILLING PAGE & LIVE RAZORPAY PAYMENT INTEGRATION
 // =========================================================================
 function openModalById(gameId) {
   const game = paidSteamGames.find(g => g.id === gameId);
@@ -336,6 +432,13 @@ function openBillingModal(gameId) {
   pendingCheckoutGame = game;
   const priceInfo = calculateGamePrice(game.price, game.category);
 
+  // Autofill billing details if user is logged in
+  const savedUser = JSON.parse(localStorage.getItem('lurova_sso_user') || 'null');
+  if (savedUser && savedUser.isLoggedIn) {
+    if (savedUser.name) document.getElementById('billName').value = savedUser.name;
+    if (savedUser.email) document.getElementById('billEmail').value = savedUser.email;
+  }
+
   document.getElementById('summaryGameTitle').innerText = game.title;
   document.getElementById('summaryBasePrice').innerText = `₹${priceInfo.originalPrice.toLocaleString('en-IN')}`;
   document.getElementById('summaryDiscount').innerText = `-₹${(priceInfo.originalPrice - priceInfo.discountedPrice).toLocaleString('en-IN')} (${priceInfo.discountPercentage}% OFF)`;
@@ -355,7 +458,7 @@ function handleBillingSubmit(event) {
 
   const priceInfo = calculateGamePrice(pendingCheckoutGame.price, pendingCheckoutGame.category);
 
-  // Trigger Razorpay with user's live API Key ID
+  // Razorpay Checkout configured with your live Key ID
   const options = {
     "key": "rzp_live_S4aoxO09BneiJ3",
     "amount": priceInfo.discountedPrice * 100,
@@ -366,7 +469,6 @@ function handleBillingSubmit(event) {
     "handler": function (response) {
       alert("Payment Successful!\nPayment ID: " + response.razorpay_payment_id + "\nGame added to 'My Games' Vault.");
       
-      // Save game to user's purchased vault in localStorage
       savePurchasedGame(pendingCheckoutGame, response.razorpay_payment_id);
       
       closeModal('billingModal');
@@ -419,7 +521,7 @@ function escapeQuotes(str) {
 }
 
 // =========================================================================
-// 7. NATIVE PLAYABLE WEB ARCADE ENGINE
+// 8. NATIVE PLAYABLE WEB ARCADE ENGINE
 // =========================================================================
 let currentArcadeGame = 'spaceShooter';
 let arcadeInterval = null;
@@ -636,9 +738,10 @@ function runBrickBreaker(canvas, ctx) {
 }
 
 // =========================================================================
-// 8. INITIALIZATION
+// 9. INITIALIZATION
 // =========================================================================
 function initLUROVA() {
+  checkSSOAuthentication();
   renderSteamStore();
   renderNews();
   renderMyGames();
