@@ -18,6 +18,7 @@
       --accent-purple: #8a2be2;
       --accent-pink: #ff007f;
       --accent-gold: #ffd700;
+      --accent-green: #00ff88;
       --text-main: #f0f4f8;
       --text-muted: #94a3b8;
       --border-glow: rgba(0, 240, 255, 0.25);
@@ -387,7 +388,7 @@
       box-shadow: 0 0 35px rgba(0, 240, 255, 0.3);
       border-radius: 14px;
       width: 100%;
-      max-width: 700px;
+      max-width: 750px;
       max-height: 90vh;
       overflow-y: auto;
       padding: 24px;
@@ -419,6 +420,85 @@
     .spec-label {
       color: var(--accent-cyan);
       font-weight: bold;
+    }
+
+    /* DEDICATED BILLING FORM STYLING */
+    .billing-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      padding: 10px 14px;
+      background: rgba(13, 18, 36, 0.9);
+      border: 1px solid var(--border-glow);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .price-summary-box {
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px dashed var(--accent-cyan);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .summary-row.total-row {
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 8px;
+      color: var(--accent-gold);
+    }
+
+    /* MY GAMES SECTION */
+    .my-games-empty {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px dashed var(--border-glow);
+    }
+
+    .my-games-empty i {
+      font-size: 3.5rem;
+      color: var(--accent-cyan);
+      margin-bottom: 15px;
     }
 
     /* NATIVE WEB ARCADE UI */
@@ -517,48 +597,6 @@
       transform: scale(1.05);
     }
 
-    /* Video Player Grid */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 22px;
-    }
-
-    .video-card {
-      background: var(--bg-card);
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.3s ease;
-    }
-
-    .video-card:hover {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.2);
-      transform: translateY(-4px);
-    }
-
-    .video-wrapper {
-      position: relative;
-      padding-bottom: 56.25%;
-      height: 0;
-    }
-
-    .video-wrapper iframe {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-    }
-
-    .video-info {
-      padding: 14px 16px;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.95rem;
-    }
-
     /* News Grid & Expandable Cards */
     .news-grid {
       display: grid;
@@ -643,12 +681,16 @@
         font-size: 1rem;
       }
 
-      .grid-container, .news-grid, .video-grid {
+      .grid-container, .news-grid {
         grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
       }
 
-      .modal-specs-grid {
+      .modal-specs-grid, .billing-form-grid {
         grid-template-columns: 1fr;
+      }
+
+      .form-group.full-width {
+        grid-column: span 1;
       }
 
       .arcade-stage {
@@ -675,7 +717,7 @@
     <nav id="mainNav">
       <a href="#store" class="nav-link active" onclick="switchTab('store', event)">Store</a>
       <a href="#online-games" class="nav-link" onclick="switchTab('online-games', event)">Web Arcade</a>
-      <a href="#videos" class="nav-link" onclick="switchTab('videos', event)">Videos</a>
+      <a href="#my-games" class="nav-link" onclick="switchTab('my-games', event)">My Games</a>
       <a href="#news" class="nav-link" onclick="switchTab('news', event)">News Hub</a>
     </nav>
 
@@ -686,7 +728,7 @@
 
   <div class="hero">
     <h1 class="gradient-text">FUTURISTIC GAMING VAULT</h1>
-    <p>Explore 400+ Paid PC Games, Play Native Web Games, Watch Creator Videos & News</p>
+    <p>Explore 400+ Paid PC Games, Play Native Web Games, Manage Purchased Keys & News</p>
 
     <div class="search-container">
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -717,7 +759,7 @@
   <section id="online-games" class="section-container">
     <div class="section-title">
       <span>Play Online Cyberpunk Web Games</span>
-      <span class="badge-count">Instant Play (100% Working)</span>
+      <span class="badge-count">Instant Play</span>
     </div>
 
     <div class="arcade-wrapper">
@@ -745,12 +787,13 @@
     </div>
   </section>
 
-  <section id="videos" class="section-container">
+  <section id="my-games" class="section-container">
     <div class="section-title">
-      <span>Top Creator Gaming Videos</span>
-      <span class="badge-count" id="videoCountBadge">150 Videos</span>
+      <span>My Purchased Games Vault</span>
+      <span class="badge-count" id="myGamesCountBadge">0 Owned</span>
     </div>
-    <div class="video-grid" id="youtube-videos-grid">
+
+    <div class="grid-container" id="my-games-grid">
       </div>
   </section>
 
@@ -771,7 +814,7 @@
 
   <div id="gameModal" class="modal">
     <div class="modal-content">
-      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <span class="close-btn" onclick="closeModal('gameModal')">&times;</span>
       <h2 id="modalTitle" class="gradient-text" style="margin-bottom: 12px;">Game Title</h2>
       <img id="modalImg" src="" alt="Game Banner" style="width:100%; height:230px; object-fit:cover; border-radius:8px; margin-bottom:12px;">
       
@@ -786,8 +829,73 @@
       
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div id="modalPrice" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-cyan); font-family: 'Orbitron';">₹0.00</div>
-        <button id="modalBuyBtn" class="btn btn-buy" style="max-width: 200px;">Buy Now (Razorpay)</button>
+        <button id="modalBuyBtn" class="btn btn-buy" style="max-width: 200px;">Proceed To Billing</button>
       </div>
+    </div>
+  </div>
+
+  <div id="billingModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <span class="close-btn" onclick="closeModal('billingModal')">&times;</span>
+      <h2 class="gradient-text" style="margin-bottom: 5px;">CHECKOUT & BILLING DETAILS</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Please enter your details to finalize game purchase key registration.</p>
+
+      <form id="billingForm" onsubmit="handleBillingSubmit(event)">
+        <div class="billing-form-grid">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="billName" class="form-control" placeholder="Gamer Name" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" id="billEmail" class="form-control" placeholder="gamer@lurova.life" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="billPhone" class="form-control" placeholder="+91 9876543210" required>
+          </div>
+          <div class="form-group">
+            <label>Pincode *</label>
+            <input type="text" id="billPincode" class="form-control" placeholder="110001" required>
+          </div>
+          <div class="form-group full-width">
+            <label>Billing Address *</label>
+            <input type="text" id="billAddress" class="form-control" placeholder="Street / House No. / Area" required>
+          </div>
+          <div class="form-group">
+            <label>City *</label>
+            <input type="text" id="billCity" class="form-control" placeholder="New Delhi" required>
+          </div>
+          <div class="form-group">
+            <label>State *</label>
+            <input type="text" id="billState" class="form-control" placeholder="Delhi" required>
+          </div>
+        </div>
+
+        <div class="price-summary-box">
+          <div style="font-family: 'Orbitron'; font-weight: bold; margin-bottom: 10px; color: var(--accent-cyan);">PRICE SUMMARY</div>
+          <div class="summary-row">
+            <span>Item Name:</span>
+            <span id="summaryGameTitle" style="font-weight: bold;">--</span>
+          </div>
+          <div class="summary-row">
+            <span>Base Price:</span>
+            <span id="summaryBasePrice">₹0</span>
+          </div>
+          <div class="summary-row" style="color: var(--accent-pink);">
+            <span>Discount Applied:</span>
+            <span id="summaryDiscount">-₹0</span>
+          </div>
+          <div class="summary-row total-row">
+            <span>Total Payable Amount:</span>
+            <span id="summaryTotal">₹0</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-buy" style="width: 100%; padding: 14px; font-size: 1.1rem;">
+          <i class="fa-solid fa-lock"></i> PROCEED TO PAY VIA RAZORPAY
+        </button>
+      </form>
     </div>
   </div>
 
