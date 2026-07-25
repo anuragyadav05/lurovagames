@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUROVA Games - Futuristic Gaming Platform</title>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #04060c;
+      --bg-card: rgba(13, 18, 36, 0.85);
+      --bg-card-hover: rgba(20, 28, 58, 0.95);
+      --accent-cyan: #00f0ff;
+      --accent-purple: #8a2be2;
+      --accent-pink: #ff007f;
+      --accent-gold: #ffd700;
+      --text-main: #f0f4f8;
+      --text-muted: #94a3b8;
+      --border-glow: rgba(0, 240, 255, 0.25);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.18) 0%, transparent 45%),
+        linear-gradient(to bottom, rgba(4,6,12,0.95), rgba(4,6,12,0.98));
+      background-attachment: fixed;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink), var(--accent-cyan));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 6s ease infinite;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Header & Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(4, 6, 12, 0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-glow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 5%;
+      box-shadow: 0 4px 30px rgba(0, 240, 255, 0.1);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-size: 1.5rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.08);
+      text-shadow: 0 0 12px var(--accent-cyan);
+      border-bottom: 2px solid var(--accent-cyan);
+    }
+
+    .auth-btn {
+      background: linear-gradient(45deg, var(--accent-purple), var(--accent-pink));
+      color: white;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 30px rgba(255, 0, 127, 0.8);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 40px 15px 20px;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 750px;
+      margin: 0 auto 20px;
+    }
+
+    /* Search Input Bars */
+    .search-container {
+      max-width: 650px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 20px 14px 50px;
+      background: rgba(13, 18, 36, 0.9);
+      border: 2px solid var(--border-glow);
+      border-radius: 50px;
+      color: #fff;
+      font-size: 1.05rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent-cyan);
+      font-size: 1.1rem;
+    }
+
+    /* Category Filter Buttons */
+    .category-filter-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px auto 30px;
+      max-width: 1100px;
+    }
+
+    .cat-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-size: 0.95rem;
+    }
+
+    .cat-btn:hover, .cat-btn.active {
+      background: var(--accent-cyan);
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Layout Sections */
+    .section-container {
+      max-width: 1450px;
+      margin: 0 auto;
+      padding: 20px 15px;
+      display: none;
+    }
+
+    .section-container.active-section {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 25px;
+      border-left: 5px solid var(--accent-cyan);
+      padding-left: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge-count {
+      font-size: 0.95rem;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* Game Store Grid */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 22px;
+    }
+
+    .game-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 8px 25px rgba(0, 240, 255, 0.25);
+    }
+
+    .game-card img {
+      width: 100%;
+      height: 165px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 8px;
+      height: 50px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .meta-pills {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .meta-pill {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .meta-pill.cat-pill {
+      color: var(--accent-gold);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .card-price {
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      font-weight: 800;
+      margin-bottom: 12px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .btn-group {
+      margin-top: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .btn-buy {
+      background: linear-gradient(45deg, #00b0ff, #00e5ff);
+      color: #000;
+      font-weight: 800;
+    }
+
+    .btn-details {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .btn:hover {
+      filter: brightness(1.2);
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .modal-content {
+      background: #080d1a;
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.3);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px; right: 20px;
+      font-size: 1.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .modal-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+
+    .spec-item {
+      font-size: 0.9rem;
+    }
+
+    .spec-label {
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+
+    /* Arcade Container */
+    .arcade-container {
+      width: 100%;
+      height: 75vh;
+      min-height: 500px;
+      border: 2px solid var(--border-glow);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Video Player Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .video-card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+    }
+
+    .video-info {
+      padding: 12px 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    /* News Grid & Expandable Cards */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .news-card {
+      background: var(--bg-card);
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-pink);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .news-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+    }
+
+    .news-tag {
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .news-card.expanded .full-news-body {
+      display: block;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .full-news-body {
+      display: none;
+      color: var(--text-muted);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .expand-indicator {
+      font-size: 0.85rem;
+      color: var(--accent-gold);
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    /* MOBILE RESPONSIVE MEDIA QUERIES */
+    @media (max-width: 868px) {
+      header {
+        padding: 12px 4%;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(4, 6, 12, 0.98);
+        flex-direction: column;
+        padding: 15px;
+        border-bottom: 1px solid var(--border-glow);
+        gap: 12px;
+      }
+
+      nav.mobile-active {
+        display: flex;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .grid-container, .news-grid, .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+      }
+
+      .modal-specs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo gradient-text">
+      <i class="fa-solid fa-gamepad"></i> LUROVA GAMES
+    </div>
+
+    <button class="mobile-menu-btn" onclick="toggleMobileNav()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav id="mainNav">
+      <a href="#store" class="nav-link active" onclick="switchTab('store', event)">Store</a>
+      <a href="#online-games" class="nav-link" onclick="switchTab('online-games', event)">Web Arcade</a>
+      <a href="#videos" class="nav-link" onclick="switchTab('videos', event)">Videos</a>
+      <a href="#news" class="nav-link" onclick="switchTab('news', event)">News Hub</a>
+    </nav>
+
+    <a href="https://account.lurova.life" target="_blank" class="auth-btn">
+      <i class="fa-solid fa-user-astronaut"></i> SSO Login
+    </a>
+  </header>
+
+  <div class="hero">
+    <h1 class="gradient-text">FUTURISTIC GAMING VAULT</h1>
+    <p>Explore 400+ Paid PC Games, Free Web Arcade, Creator Videos & News</p>
+
+    <div class="search-container">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="gameSearchInput" class="search-input" placeholder="Search 400+ games by title, category or keyword..." onkeyup="filterGames()">
+    </div>
+
+    <div class="category-filter-bar">
+      <button class="cat-btn active" onclick="filterCategory('ALL', this)">All Games</button>
+      <button class="cat-btn" onclick="filterCategory('Action', this)">Action</button>
+      <button class="cat-btn" onclick="filterCategory('RPG', this)">RPG</button>
+      <button class="cat-btn" onclick="filterCategory('Open World', this)">Open World</button>
+      <button class="cat-btn" onclick="filterCategory('Horror', this)">Horror</button>
+      <button class="cat-btn" onclick="filterCategory('Strategy', this)">Strategy</button>
+      <button class="cat-btn" onclick="filterCategory('Sports', this)">Sports</button>
+      <button class="cat-btn" onclick="filterCategory('Sci-Fi', this)">Sci-Fi</button>
+    </div>
+  </div>
+
+  <section id="store" class="section-container active-section">
+    <div class="section-title">
+      <span>PC Games Store Library</span>
+      <span class="badge-count" id="gamesCountBadge">400 Games</span>
+    </div>
+    <div class="grid-container" id="steam-games-grid">
+      </div>
+  </section>
+
+  <section id="online-games" class="section-container">
+    <div class="section-title">
+      <span>Play Free Web Arcade Games</span>
+      <span class="badge-count">Instant Play</span>
+    </div>
+    <div class="arcade-container">
+      <iframe src="https://www.gamezop.com/" title="LUROVA Web Arcade Hub" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <section id="videos" class="section-container">
+    <div class="section-title">
+      <span>Top Creator Gaming Videos</span>
+      <span class="badge-count" id="videoCountBadge">150 Videos</span>
+    </div>
+    <div class="video-grid" id="youtube-videos-grid">
+      </div>
+  </section>
+
+  <section id="news" class="section-container">
+    <div class="section-title">
+      <span>Gaming News & Intel</span>
+      <span class="badge-count" id="newsCountBadge">150 Articles</span>
+    </div>
+
+    <div class="search-container" style="margin-bottom: 25px;">
+      <i class="fa-solid fa-newspaper search-icon"></i>
+      <input type="text" id="newsSearchInput" class="search-input" placeholder="Search news by topic, title, or platform..." onkeyup="filterNews()">
+    </div>
+
+    <div class="news-grid" id="gaming-news-grid">
+      </div>
+  </section>
+
+  <div id="gameModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <h2 id="modalTitle" class="gradient-text" style="margin-bottom: 12px;">Game Title</h2>
+      <img id="modalImg" src="" alt="Game Banner" style="width:100%; height:230px; object-fit:cover; border-radius:8px; margin-bottom:12px;">
+      
+      <div class="modal-specs-grid">
+        <div class="spec-item"><span class="spec-label"><i class="fa-regular fa-calendar"></i> Launch Date:</span> <span id="modalLaunchDate">--</span></div>
+        <div class="spec-item"><span class="spec-label"><i class="fa-solid fa-hard-drive"></i> Game Size:</span> <span id="modalSize">--</span></div>
+        <div class="spec-item"><span class="spec-label"><i class="fa-solid fa-code-branch"></i> Version:</span> <span id="modalVersion">--</span></div>
+        <div class="spec-item"><span class="spec-label"><i class="fa-solid fa-layer-group"></i> Category:</span> <span id="modalCategory">--</span></div>
+      </div>
+
+      <p id="modalDesc" style="color: var(--text-muted); line-height: 1.5; margin-bottom: 18px; font-size: 0.95rem;">Game description...</p>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div id="modalPrice" style="font-size: 1.6rem; font-weight: bold; color: var(--accent-cyan); font-family: 'Orbitron';">₹0.00</div>
+        <button id="modalBuyBtn" class="btn btn-buy" style="max-width: 200px;">Buy Now (Razorpay)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="style.js"></script>
+</body>
+</html>
